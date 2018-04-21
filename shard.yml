@@ -1,0 +1,10 @@
+name: coverage
+version: 0.1.0
+
+authors:
+   - Yacine Petitprez <anykeyh@gmail.com>
+
+description: |
+  Get coverage rate of your crystal app !
+
+license: MIT
