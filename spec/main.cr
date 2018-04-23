@@ -1,4 +1,3 @@
-require "./**" # Require other files
 def main
   if_then_else
   case_when
@@ -7,6 +6,8 @@ def main
   k.some_method
   k.some_class_method
 end
+
+require "./**" # Require other files
 
 def if_then_else
   x = "SomeVariable"
