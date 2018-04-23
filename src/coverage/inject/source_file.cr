@@ -137,6 +137,8 @@ class Coverage::SourceFile < Crystal::Visitor
         [Crystal::NumberLiteral.new(@id),
          Crystal::NumberLiteral.new(lidx)].unsafe_as(Array(Crystal::ASTNode)))
       n
+    else
+      node
     end
   end
 
@@ -177,8 +179,7 @@ class Coverage::SourceFile < Crystal::Visitor
     file = node.string
     # we cover only files which are relative to current file
     if file[0] == '.'
-      current_directory = File.dirname(@path)
-      pp current_directory
+      current_directory = Coverage::SourceFile.relative_path_to_project(File.dirname(@path))
 
       files_to_load = File.expand_path(file, current_directory)
 
@@ -190,12 +191,10 @@ class Coverage::SourceFile < Crystal::Visitor
       list_of_required_file = [] of Coverage::SourceFile
       Coverage::SourceFile.require_expanders << list_of_required_file
 
-      puts "Look for files #{files_to_load}"
       Dir[files_to_load].each do |file|
         next if file !~ /\.cr$/
 
         Coverage::SourceFile.cover_file(file) do
-          puts "Load file #{file}"
           line_number = node.location.not_nil!.line_number
 
           v = Coverage::SourceFile.new(path: file, source: ::File.read(file),
