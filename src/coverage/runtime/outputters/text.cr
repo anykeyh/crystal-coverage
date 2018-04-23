@@ -1,33 +1,30 @@
-class Coverage::TextOutputter < Coverage::Outputter
+class Coverage::Outputter::Text < Coverage::Outputter
   def initialize
   end
 
-  private def get_file_list(files, json, io)
-    json.array do
-      files.each do |file|
-        json.object do
-          json.field "name", file.path
-          json.field "source_digest", file.md5
-          json.field "coverage" do
-            json.array do
-              h = {} of Int32 => Int32?
+  def output(files : Array(Coverage::File))
+    puts "file\tlines\tcovered"
+    puts "-----------------------------------"
 
-              file.source_map.each_with_index { |line, idx| h[line] = file.access_map[idx] }
+    sum_lines = 0
+    sum_covered = 0
 
-              max_line = file.source_map.max
-              max_line.times.map { |x| h[x]? }.each { |x|
-                x.nil? ? json.null : json.number(x)
-              }
-            end
-          end
-        end
-      end
-    end
-  end
-
-  def output(files : Array(Coverage::File), io)
     files.each do |file|
-      file.source_map.each_with_index { |line, idx| file.access_map[idx] ? 0 : 1 }
+      file_line_count = file.access_map.size
+      file_line_covered = file.access_map.count(&.>(0))
+
+      coverage_percent = (100 * (
+        file_line_count == 0 ? 1 : file_line_covered.to_f / file_line_count
+      )).round(2).to_s + "%"
+
+      puts [file.path, file_line_count, file_line_covered, coverage_percent].join("\t")
+
+      sum_lines += file_line_count
+      sum_covered += file_line_covered
     end
+
+    puts "-----------------------------------"
+    total_percent = (100 * (sum_covered / sum_lines.to_f)).round(2).to_s + "%"
+    puts ["TOTAL:", sum_lines, sum_covered, total_percent].join("\t")
   end
 end

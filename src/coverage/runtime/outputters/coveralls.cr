@@ -1,10 +1,10 @@
-class Coverage::CoverallOutputter < Coverage::Outputter
+class Coverage::Outputter::Coveralls < Coverage::Outputter
   def initialize
     @service_job_id = (ENV["TRAVIS_JOB_ID"]? || Time.now.epoch.to_s)
     @service_name = ENV["TRAVIS"]? ? "travis-ci" : "dev"
   end
 
-  private def get_file_list(files, json, io)
+  private def get_file_list(files, json)
     json.array do
       files.each do |file|
         json.object do
@@ -16,8 +16,8 @@ class Coverage::CoverallOutputter < Coverage::Outputter
 
               file.source_map.each_with_index { |line, idx| h[line] = file.access_map[idx] }
 
-              max_line = file.source_map.max
-              max_line.times.map { |x| h[x]? }.each { |x|
+              max_line = file.source_map.max rescue 0
+              (1...max_line).map { |x| h[x]? }.each { |x|
                 x.nil? ? json.null : json.number(x)
               }
             end
@@ -27,15 +27,17 @@ class Coverage::CoverallOutputter < Coverage::Outputter
     end
   end
 
-  def output(files : Array(Coverage::File), io)
-    io << JSON.build do |json|
+  def output(files : Array(Coverage::File))
+    o = JSON.build do |json|
       json.object do
         json.field "service_job_id", @service_job_id
         json.field "service_name", @service_name
         json.field "source_files" do
-          get_file_list(files, json, io)
+          get_file_list(files, json)
         end
       end
     end
+
+    puts o
   end
 end

@@ -6,8 +6,6 @@ module Coverage
   @@reverse_file_index = {} of String => Int32
   class_property file_count : Int32 = 0
 
-  class_property outputter : Coverage::Outputter?
-
   class File
     property path : String
     property source_map : Slice(Int32)
@@ -28,7 +26,7 @@ module Coverage
   end
 
   abstract class Outputter
-    abstract def output(files : Array(Coverage::File), io)
+    abstract def output(files : Array(Coverage::File))
   end
 
   def self.add_file(file)
@@ -43,8 +41,7 @@ module Coverage
   end
 
   # Return results of the coverage in JSON
-  def self.get_results(io = STDOUT)
-    outputter = @@outputter || TextOutputter.new
-    outputter.output(@@files, io)
+  def self.get_results(outputter : Outputter = Outputter::Text.new)
+    outputter.output(@@files)
   end
 end

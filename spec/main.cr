@@ -4,7 +4,12 @@ def main
 
   k = SomeModule::SomeClass.new
   k.some_method
-  k.some_class_method
+  SomeModule::SomeClass.some_class_method
+
+  n = 0
+  while n < 10
+    n += 1
+  end
 end
 
 require "./**" # Require other files

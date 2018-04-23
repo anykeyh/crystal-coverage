@@ -7,6 +7,7 @@ class Coverage::SourceFile < Crystal::Visitor
   class_getter already_covered_file_name = Set(String).new
   class_getter! project_path : String
   class_getter require_expanders = [] of Array(Coverage::SourceFile)
+  class_property outputter : String = "Coverage::Outputter::Text"
 
   getter id : Int32 = 0
   getter path : String
@@ -110,7 +111,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_cover_outputting
-    @is_root ? "\n::Coverage.get_results(STDOUT)" : ""
+    @is_root ? "\n::Coverage.get_results(#{@@outputter}.new)" : ""
   end
 
   private def inject_line_traces(output)
