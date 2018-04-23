@@ -5,6 +5,9 @@ authors:
    - Yacine Petitprez <anykeyh@gmail.com>
 
 description: |
-  Get coverage rate of your crystal app !
+  Get coverage rate of your crystal app ! Proof of concept, beware !
+
+scripts:
+  postinstall: crystal src/coverage/inject/cli.cr -o ./crystal-coverage
 
 license: MIT

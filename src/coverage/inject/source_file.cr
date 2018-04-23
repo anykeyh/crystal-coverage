@@ -50,8 +50,12 @@ class Coverage::SourceFile < Crystal::Visitor
 
       astree = Crystal::Parser.parse(self.source)
       astree.accept(self)
+
+      # To call before injection of cover head dependencies
+      main_source = unfold_required(inject_line_traces(astree.to_s))
+
       io << inject_cover_requirement
-      io << unfold_required(inject_line_traces(astree.to_s))
+      io << main_source
       io << inject_cover_outputting
 
       @enriched_source = io.to_s
@@ -87,11 +91,15 @@ class Coverage::SourceFile < Crystal::Visitor
   private def inject_cover_requirement
     if @is_root
       file_maps = @@file_list.map do |f|
-        "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
+        if f.lines.any?
+          "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
+        else
+          "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[] of Int32)"
+        end
       end.join("\n")
 
       <<-RAW
-      require "../src/coverage"
+      require "./src/coverage/runtime"
       #{file_maps}
       #{inject_location}
 
