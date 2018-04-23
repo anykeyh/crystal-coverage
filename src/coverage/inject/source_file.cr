@@ -189,10 +189,12 @@ class Coverage::SourceFile < Crystal::Visitor
       list_of_required_file = [] of Coverage::SourceFile
       Coverage::SourceFile.require_expanders << list_of_required_file
 
+      puts "Look for files #{files_to_load}"
       Dir[files_to_load].each do |file|
         next if file !~ /\.cr$/
 
         Coverage::SourceFile.cover_file(file) do
+          puts "Load file #{file}"
           line_number = node.location.not_nil!.line_number
 
           v = Coverage::SourceFile.new(path: file, source: ::File.read(file),
