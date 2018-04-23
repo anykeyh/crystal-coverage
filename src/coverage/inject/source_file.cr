@@ -241,10 +241,18 @@ class Coverage::SourceFile < Crystal::Visitor
     true
   end
 
-  def visit(node : Crystal::If | Crystal::Unless)
+  def visit(node : Crystal::If)
+    unless node.ternary?
+      node.then = force_inject_cover(node.then)
+      node.else = force_inject_cover(node.else)
+    end
+
+    true
+  end
+
+  def visit(node : Crystal::Unless)
     node.then = force_inject_cover(node.then)
     node.else = force_inject_cover(node.else)
-
     true
   end
 
