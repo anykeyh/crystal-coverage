@@ -178,6 +178,7 @@ class Coverage::SourceFile < Crystal::Visitor
     # we cover only files which are relative to current file
     if file[0] == '.'
       current_directory = File.dirname(@path)
+      pp current_directory
 
       files_to_load = File.expand_path(file, current_directory)
 
