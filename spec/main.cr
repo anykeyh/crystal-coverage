@@ -1,3 +1,5 @@
+require "./other_file2"
+
 def main
   if_then_else
   case_when
