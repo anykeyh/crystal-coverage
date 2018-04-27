@@ -113,7 +113,7 @@ class Coverage::SourceFile < Crystal::Visitor
       end.join("\n")
 
       <<-RAW
-      require "./src/coverage/runtime"
+      require "coverage/runtime"
       #{file_maps}
       #{inject_location}
 

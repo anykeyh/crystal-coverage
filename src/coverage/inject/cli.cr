@@ -17,7 +17,9 @@ module Coverage
             exit
           end
 
-          filename = ARGV.shift
+          args.each do
+            filenames = ARGV.shift
+          end
         end
       end
 
