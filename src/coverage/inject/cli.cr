@@ -4,7 +4,7 @@ module Coverage
   module CLI
     def self.run
       output_format = "Text"
-      filenames = []
+      filenames = [] of String
       print_only = false
 
       OptionParser.parse! do |parser|
@@ -18,14 +18,14 @@ module Coverage
         end
       end
 
-      raise "You must choose a file to compile" unless filenames.empty?
+      raise "You must choose a file to compile" unless filenames.any?
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
       first = true
       output = String::Builder.new(capacity: 2**18)
       filenames.each do |f|
-        v = Coverage::SourceFile.new(path: filename, source: ::File.read(filename), is_root: first)
+        v = Coverage::SourceFile.new(path: f, source: ::File.read(f), is_root: first)
         output << v.to_covered_source
         output << "\n"
         first = false
