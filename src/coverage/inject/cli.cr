@@ -12,18 +12,13 @@ module Coverage
         parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |p| print_only = true }
         parser.unknown_args do |args|
-          if args.size != 1
-            puts parser
-            exit
-          end
-
           args.each do
             filenames << ARGV.shift
           end
         end
       end
 
-      raise "You must choose a file to compile" if filenames.empty?
+      raise "You must choose a file to compile" unless filenames.empty?
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
