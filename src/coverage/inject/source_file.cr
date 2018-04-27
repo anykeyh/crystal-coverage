@@ -3,6 +3,19 @@ require "digest"
 require "file_utils"
 
 class Coverage::SourceFile < Crystal::Visitor
+  CRYSTAL_KEYWORDS = %w(
+    abstract do if nil? self unless
+    alias else in of sizeof until
+    as elsif include out struct when
+    as? end instance_sizeof pointerof super while
+    asm ensure is_a? private then with
+    begin enum lib protected true yield
+    break extend macro require type
+    case false module rescue typeof
+    class for next return uninitialized
+    def fun nil select union
+  )
+
   class_getter file_list = [] of Coverage::SourceFile
   class_getter already_covered_file_name = Set(String).new
   class_getter! project_path : String
@@ -133,6 +146,7 @@ class Coverage::SourceFile < Crystal::Visitor
     if location = node.location
       lnum = location.line_number
       lidx = source_map_index(lnum)
+
       n = Crystal::Call.new(Crystal::Global.new("::Coverage"), "[]",
         [Crystal::NumberLiteral.new(@id),
          Crystal::NumberLiteral.new(lidx)].unsafe_as(Array(Crystal::ASTNode)))
@@ -211,7 +225,31 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   # Do not visit sub elements of inlined computations
-  def visit(node : Crystal::OpAssign | Crystal::Assign | Crystal::BinaryOp)
+  def visit(node : Crystal::OpAssign | Crystal::BinaryOp)
+    true
+  end
+
+  def visit(node : Crystal::Arg)
+    name = node.name
+    if CRYSTAL_KEYWORDS.includes?(name)
+      node.external_name = node.name = "_#{name}"
+    end
+
+    true
+  end
+
+  # Placeholder for bug #XXX
+  def visit(node : Crystal::Assign)
+    target = node.target
+    value = node.value
+
+    if target.is_a?(Crystal::InstanceVar) &&
+       value.is_a?(Crystal::Var)
+      if CRYSTAL_KEYWORDS.includes?(value.name)
+        value.name = "_#{value.name}"
+      end
+    end
+
     true
   end
 
