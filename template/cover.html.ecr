@@ -116,7 +116,7 @@
           <%- unless hit_count.nil? -%>
           <div class="hit-count"><%= hit_count %></div>
           <%- end -%>
-          <pre class="<%= hit_count.nil? ? "irrelevant-line" : "relevant-line" %> <%= (!hit_count.nil? && hit_count > 0) ? "covered" : "" %>"><%= line_content %></pre>
+          <pre class="<%= hit_count.nil? ? "irrelevant-line" : "relevant-line" %> <%= (!hit_count.nil? && hit_count > 0) ? "covered" : "" %>"><%= HTML.escape(line_content) %></pre>
         </div>
       <%- end -%>
     </div>

@@ -1,5 +1,6 @@
 require "ecr"
 require "file_utils"
+require "html"
 
 class Coverage::Outputter::HtmlReport < Coverage::Outputter
   struct CoverageReport
@@ -36,7 +37,18 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
   end
 
   class SummaryFile
-    def initialize(@covered_files : Array(CoverageReport))
+    property total_relevant : Int32
+    property total_covered : Int32
+
+    def total_percentage
+      if total_relevant == 0
+        "100%"
+      else
+        (100.0*(total_covered / total_relevant.to_f)).round(2).to_s + "%"
+      end
+    end
+
+    def initialize(@covered_files : Array(CoverageReport), @total_relevant, @total_covered)
     end
 
     {% begin %}
@@ -91,13 +103,16 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
         cr.lines << {line, hitted}
       end
 
+      sum_lines += cr.relevant_lines
+      sum_covered += cr.covered_lines
+
       cr
     end
 
     # Generate the code
     FileUtils.mkdir_p("coverage")
     generate_index_file(covered_files)
-    generate_summary_file(covered_files)
+    generate_summary_file(covered_files, sum_lines, sum_covered)
     covered_files.each do |file|
       generate_detail_file(file)
     end
@@ -107,8 +122,8 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
     ::File.write("coverage/index.html", IndexFile.new(covered_files).to_s)
   end
 
-  private def generate_summary_file(covered_files)
-    ::File.write("coverage/summary.html", SummaryFile.new(covered_files).to_s)
+  private def generate_summary_file(covered_files, total_lines, covered_lines)
+    ::File.write("coverage/summary.html", SummaryFile.new(covered_files, total_lines, covered_lines).to_s)
   end
 
   private def generate_detail_file(file)
