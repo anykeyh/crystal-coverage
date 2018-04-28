@@ -3,14 +3,15 @@ require "option_parser"
 module Coverage
   module CLI
     def self.run
-      output_format = "Text"
+      output_format = "HtmlReport"
       filenames = [] of String
       print_only = false
 
       OptionParser.parse! do |parser|
         parser.banner = "Usage: crystal-cover [options] <filename>"
-        parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used") { |f| output_format = f }
+        parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport) ") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |p| print_only = true }
+        parser.on("--use-require=REQUIRE", "change the require of cover library in runtime") { |r| Coverage::SourceFile.use_require = r }
         parser.unknown_args do |args|
           args.each do
             filenames << ARGV.shift

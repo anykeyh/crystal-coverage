@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <meta charset="UTF-8">
+  <style>
+    html, body {
+      margin: 0;
+      font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    }
+    iframe {
+      width: calc(100% - 200px);
+      height: 100vh;
+      margin: 0;
+      border: none;
+    }
+    nav {
+      margin: 0;
+      padding: 1em;
+      box-sizing: border-box;
+      float: left;
+      height: 100vh;
+      width: 200px;
+      display: block;
+      overflow: auto;
+    }
+
+    ul {
+      margin: 0;
+      list-style: none;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="summary.html" target="iframe">Index</a>
+    <h3>Files</h3>
+    <ul>
+      <%- @covered_files.each do |file| -%>
+        <li><a href="<%=file.md5%>.html" target="iframe"><%=file.filename%></li>
+      <%- end -%>
+    </ul>
+  </nav>
+  <iframe name="iframe" src="summary.html"></iframe>
+</body>
+</html>

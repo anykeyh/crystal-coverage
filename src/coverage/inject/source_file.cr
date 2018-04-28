@@ -26,7 +26,9 @@ class Coverage::SourceFile < Crystal::Visitor
   class_getter already_covered_file_name = Set(String).new
   class_getter! project_path : String
   class_getter require_expanders = [] of Array(Coverage::SourceFile)
-  class_property outputter : String = "Coverage::Outputter::Text"
+
+  class_property outputter : String = "Coverage::Outputter::HtmlReport"
+  class_property use_require : String = "coverage/runtime"
 
   getter! astree : Crystal::ASTNode
   getter id : Int32 = 0
@@ -128,7 +130,7 @@ class Coverage::SourceFile < Crystal::Visitor
       end.join("\n")
 
       <<-RAW
-      require "coverage/runtime"
+      require "#{Coverage::SourceFile.use_require}"
       #{file_maps}
       #{inject_location}
 

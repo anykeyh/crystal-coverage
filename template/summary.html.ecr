@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Crystal Coverage</title>
+  <meta charset="UTF-8">
+  <style>
+    html, body {
+      margin: 0;
+      font-family: 'Helvetica Neue', 'Arial', sans-serif;
+    }
+
+    table {
+      margin: auto;
+    }
+
+    th {
+      text-align: left;
+    }
+
+    th,td {
+      padding: 0.2em, 1em;
+    }
+    tr {
+      border-bottom: solid 1px black;
+    }
+
+  </style>
+</head>
+<body>
+  <h1>Covering report</h1>
+  <hr>
+  <table>
+    <thead>
+      <th>File</th>
+      <th>Relevant lines</th>
+      <th>Covered lines</th>
+      <th>Percentage covered</th>
+    </thead>
+    <tbody>
+      <%- @covered_files.each do |file| -%>
+      <tr>
+        <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
+        <td><%=file.relevant_lines%></td>
+        <td><%=file.covered_lines%></td>
+        <td><%=file.percent_coverage_str%></td>
+      </tr>
+      <%- end -%>
+      <tfoot>
+        <th>TOTAL: </th>
+        <th>594</th>
+        <th>324</th>
+        <th>54.55%</th>
+      </tfoot>
+    </tbody>
+  </table>
+</body>
+</html>

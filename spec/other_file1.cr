@@ -20,3 +20,9 @@ module SomeModule
     end
   end
 end
+
+{% for x in ["a", "b", "c"] %}
+  def {{x.id}}
+    puts {{x}}
+  end
+{% end %}
