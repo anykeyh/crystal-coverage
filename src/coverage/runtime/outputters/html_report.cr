@@ -2,6 +2,8 @@ require "ecr"
 require "file_utils"
 
 class Coverage::Outputter::HtmlReport < Coverage::Outputter
+  TEMPLATE_DIR = File.expand_path("../../../../template", __FILE__)
+
   struct CoverageReport
     property filename : String
     property md5 : String
@@ -29,21 +31,21 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
     def initialize(@covered_files : Array(CoverageReport))
     end
 
-    ECR.def_to_s "template/index.html.ecr"
+    ECR.def_to_s "#{TEMPLATE_DIR}/index.html.ecr"
   end
 
   class SummaryFile
     def initialize(@covered_files : Array(CoverageReport))
     end
 
-    ECR.def_to_s "template/summary.html.ecr"
+    ECR.def_to_s "#{TEMPLATE_DIR}/summary.html.ecr"
   end
 
   class CoveredFile
     def initialize(@file : CoverageReport)
     end
 
-    ECR.def_to_s "template/cover.html.ecr"
+    ECR.def_to_s "#{TEMPLATE_DIR}/cover.html.ecr"
   end
 
   def initialize
