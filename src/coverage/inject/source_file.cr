@@ -280,6 +280,11 @@ class Coverage::SourceFile < Crystal::Visitor
     true
   end
 
+  def visit(node : Macro)
+    node.body.accept(self)
+    false
+  end
+
   def visit(node : Crystal::Expressions)
     node.expressions = node.expressions.map { |elm| inject_cover(elm) }.flatten
     true
@@ -290,8 +295,37 @@ class Coverage::SourceFile < Crystal::Visitor
     true
   end
 
-  def visit(node : Crystal::Def)
+  def visit(node : Crystal::MacroExpression)
+    false
+  end
+
+  def visit(node : Crystal::MacroLiteral)
+    false
+  end
+
+  def visit(node : Crystal::MacroIf)
+    node.then = force_inject_cover(node.then)
+    node.else = force_inject_cover(node.else)
+    false
+  end
+
+  def visit(node : Crystal::MacroFor)
     node.body = force_inject_cover(node.body)
+    false
+  end
+
+  def visit(node : Crystal::MacroVar)
+    false
+  end
+
+  def visit(node : Crystal::Asm)
+    false
+  end
+
+  def visit(node : Crystal::Def)
+    unless node.macro_def?
+      node.body = force_inject_cover(node.body)
+    end
     true
   end
 
