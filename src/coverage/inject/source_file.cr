@@ -28,7 +28,7 @@ class Coverage::SourceFile < Crystal::Visitor
   class_getter require_expanders = [] of Array(Coverage::SourceFile)
   class_property outputter : String = "Coverage::Outputter::Text"
 
-  getter! astree : Crystal::Parser
+  getter! astree : Crystal::ASTNode
   getter id : Int32 = 0
   getter path : String
   getter is_root : Bool
@@ -69,7 +69,7 @@ class Coverage::SourceFile < Crystal::Visitor
   def process
     unless @astree
       @astree = Crystal::Parser.parse(self.source)
-      @astree.accept(self)
+      astree.accept(self)
     end
   end
 
