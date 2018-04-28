@@ -98,8 +98,7 @@ class Coverage::SourceFile < Crystal::Visitor
 
       if file_list.any?
         io = String::Builder.new(capacity: (2 ** 20))
-        io << str
-        io << "\n"
+        io << "#" << str << "\n"
         file_list.each do |file|
           io << inject_location(file.path, 0) << "\n"
           io << file.to_covered_source
