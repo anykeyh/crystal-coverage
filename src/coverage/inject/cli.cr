@@ -1,4 +1,5 @@
 require "option_parser"
+require "tempfile"
 
 module Coverage
   module CLI
@@ -35,7 +36,7 @@ module Coverage
       if print_only
         puts output.to_s
       else
-        system("crystal", ["eval", output.to_s] + ARGV)
+        system("crystal", ["eval", output.to_s])
       end
     end
   end
