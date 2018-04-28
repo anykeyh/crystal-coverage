@@ -3,14 +3,20 @@ require "digest"
 require "file_utils"
 
 class Coverage::SourceFile < Crystal::Visitor
+  # List of keywords which are trouble with variable
+  # name. Some keywoards are not and won't be present in this
+  # list.
+  # Since this can break the code replacing the variable by a underscored
+  # version of it, and I'm not sure about this list, we will need to add/remove
+  # stuff to not break the code.
   CRYSTAL_KEYWORDS = %w(
     abstract do if nil? self unless
-    alias else in of sizeof until
-    as elsif include out struct when
+    alias else of sizeof until
+    as elsif include struct when
     as? end instance_sizeof pointerof super while
     asm ensure is_a? private then with
     begin enum lib protected true yield
-    break extend macro require type
+    break extend macro require
     case false module rescue typeof
     class for next return uninitialized
     def fun nil select union
@@ -22,6 +28,7 @@ class Coverage::SourceFile < Crystal::Visitor
   class_getter require_expanders = [] of Array(Coverage::SourceFile)
   class_property outputter : String = "Coverage::Outputter::Text"
 
+  getter! astree : Crystal::Parser
   getter id : Int32 = 0
   getter path : String
   getter is_root : Bool
@@ -58,13 +65,19 @@ class Coverage::SourceFile < Crystal::Visitor
     @id = Coverage::SourceFile.register_file(self)
   end
 
+  # Inject in AST tree if required.
+  def process
+    unless @astree
+      @astree = Crystal::Parser.parse(self.source)
+      @astree.accept(self)
+    end
+  end
+
   def to_covered_source
     if @enriched_source.nil?
       io = String::Builder.new(capacity: 32_768)
 
-      astree = Crystal::Parser.parse(self.source)
-      astree.accept(self)
-
+      process
       # To call before injection of cover head dependencies
       main_source = unfold_required(inject_line_traces(astree.to_s))
 
@@ -85,11 +98,14 @@ class Coverage::SourceFile < Crystal::Visitor
 
       if file_list.any?
         io = String::Builder.new(capacity: (2 ** 20))
-        io << "##{str}\n"
+        io << str
+        io << "\n"
         file_list.each do |file|
           io << inject_location(file.path, 0) << "\n"
           io << file.to_covered_source
-          io << inject_location(self.path, file.required_at) << "\n"
+          io << "\n"
+          io << inject_location(self.path, file.required_at)
+          io << "\n"
         end
         io.to_s
       else
@@ -198,6 +214,7 @@ class Coverage::SourceFile < Crystal::Visitor
       files_to_load = File.expand_path(file, current_directory)
 
       if files_to_load =~ /\*$/
+        # Case when we want to require a directory and subdirectories
         if files_to_load.size > 1 && files_to_load[-2..-1] == "**"
           files_to_load += "/*.cr"
         else
@@ -217,10 +234,12 @@ class Coverage::SourceFile < Crystal::Visitor
         Coverage::SourceFile.cover_file(file) do
           line_number = node.location.not_nil!.line_number
 
-          v = Coverage::SourceFile.new(path: file, source: ::File.read(file),
+          required_file = Coverage::SourceFile.new(path: file, source: ::File.read(file),
             is_root: false, required_at: line_number)
 
-          list_of_required_file << v
+          required_file.process # Process on load, since it can change the requirement order
+
+          list_of_required_file << required_file
         end
       end
 
