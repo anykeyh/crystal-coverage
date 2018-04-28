@@ -100,8 +100,9 @@ class Coverage::SourceFile < Crystal::Visitor
 
       if file_list.any?
         io = String::Builder.new(capacity: (2 ** 20))
-        io << "#" << str << "\n"
         file_list.each do |file|
+          io << "#" << "require of `" << file.path
+          io << "` from `" << self.path << ":#{file.required_at}" << "`" << "\n"
           io << inject_location(file.path, 0) << "\n"
           io << file.to_covered_source
           io << "\n"
@@ -145,7 +146,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_line_traces(output)
-    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.+)$/) do |str, match|
+    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |str, match|
       [
         "::Coverage[", match[1],
         ", ", match[2], "] ",
