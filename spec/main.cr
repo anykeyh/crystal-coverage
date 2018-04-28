@@ -14,7 +14,8 @@ def main
   end
 end
 
-require "./**" # Require other files
+require "./**"        # Require other files
+require "./subdir/**" # Require other files
 
 def if_then_else
   x = "SomeVariable"

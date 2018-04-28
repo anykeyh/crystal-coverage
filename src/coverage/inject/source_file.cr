@@ -197,7 +197,13 @@ class Coverage::SourceFile < Crystal::Visitor
 
       files_to_load = File.expand_path(file, current_directory)
 
-      if files_to_load !~ /\.cr$/ && files_to_load !~ /\*$/
+      if files_to_load =~ /\*$/
+        if files_to_load.size > 1 && files_to_load[-2..-1] == "**"
+          files_to_load += "/*.cr"
+        else
+          files_to_load += ".cr"
+        end
+      elsif files_to_load !~ /\.cr$/
         files_to_load = files_to_load + ".cr" # << Add the extension for the crystal file.
       end
 
