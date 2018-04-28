@@ -116,7 +116,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_location(file = @path, line = 0, column = 0)
-    %(#<loc:"#{file}",#{line},0>)
+    %(#<loc:"#{file}",#{[line, 0].max},#{[column, 0].max}>)
   end
 
   private def inject_cover_requirement
@@ -145,11 +145,12 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_line_traces(output)
-    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\]/) do |str, matcher|
+    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.+)$/) do |str, match|
       [
-        "::Coverage[", matcher[1],
-        ", ", matcher[2], "] ",
-        inject_location(@path, @lines[matcher[2].to_i] - 1),
+        "::Coverage[", match[1],
+        ", ", match[2], "] ",
+        match[3],
+        inject_location(@path, @lines[match[2].to_i] - 1),
       ].join("")
     end
   end
