@@ -33,7 +33,6 @@ class Coverage::SourceFile < Crystal::Visitor
   getter! astree : Crystal::ASTNode
   getter id : Int32 = 0
   getter path : String
-  getter is_root : Bool
   getter md5_signature : String
 
   getter lines = [] of Int32
@@ -61,7 +60,7 @@ class Coverage::SourceFile < Crystal::Visitor
     end
   end
 
-  def initialize(@path, @source, @is_root = true, @required_at = 0)
+  def initialize(@path, @source, @required_at = 0)
     @path = Coverage::SourceFile.relative_path_to_project(File.expand_path(@path, "."))
     @md5_signature = Digest::MD5.hexdigest(@source)
     @id = Coverage::SourceFile.register_file(self)
@@ -79,13 +78,13 @@ class Coverage::SourceFile < Crystal::Visitor
     if @enriched_source.nil?
       io = String::Builder.new(capacity: 32_768)
 
+      # call process to enrich AST before
+      # injection of cover head dependencies
       process
-      # To call before injection of cover head dependencies
-      main_source = unfold_required(inject_line_traces(astree.to_s))
 
-      io << inject_cover_requirement
-      io << main_source
-      io << inject_cover_outputting
+      # Inject the location of the zero line of current file
+      io << inject_location << "\n"
+      io << unfold_required(inject_line_traces(astree.to_s))
 
       @enriched_source = io.to_s
     else
@@ -103,7 +102,6 @@ class Coverage::SourceFile < Crystal::Visitor
         file_list.each do |file|
           io << "#" << "require of `" << file.path
           io << "` from `" << self.path << ":#{file.required_at}" << "`" << "\n"
-          io << inject_location(file.path, 0) << "\n"
           io << file.to_covered_source
           io << "\n"
           io << inject_location(self.path, file.required_at)
@@ -120,29 +118,23 @@ class Coverage::SourceFile < Crystal::Visitor
     %(#<loc:"#{file}",#{[line, 0].max},#{[column, 0].max}>)
   end
 
-  private def inject_cover_requirement
-    if @is_root
-      file_maps = @@file_list.map do |f|
-        if f.lines.any?
-          "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
-        else
-          "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[] of Int32)"
-        end
-      end.join("\n")
+  def self.prelude_operations
+    file_maps = @@file_list.map do |f|
+      if f.lines.any?
+        "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
+      else
+        "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[] of Int32)"
+      end
+    end.join("\n")
 
-      <<-RAW
-      require "#{Coverage::SourceFile.use_require}"
-      #{file_maps}
-      #{inject_location}
-
-      RAW
-    else
-      ""
-    end
+    <<-RAW
+    require "#{Coverage::SourceFile.use_require}"
+    #{file_maps}
+    RAW
   end
 
-  private def inject_cover_outputting
-    @is_root ? "\n::Coverage.get_results(#{@@outputter}.new)" : ""
+  def self.final_operations
+    "\n::Coverage.get_results(#{@@outputter}.new)"
   end
 
   private def inject_line_traces(output)
@@ -238,7 +230,7 @@ class Coverage::SourceFile < Crystal::Visitor
           line_number = node.location.not_nil!.line_number
 
           required_file = Coverage::SourceFile.new(path: file, source: ::File.read(file),
-            is_root: false, required_at: line_number)
+            required_at: line_number)
 
           required_file.process # Process on load, since it can change the requirement order
 

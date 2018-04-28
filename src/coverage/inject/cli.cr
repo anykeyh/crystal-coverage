@@ -27,16 +27,22 @@ module Coverage
       first = true
       output = String::Builder.new(capacity: 2**18)
       filenames.each do |f|
-        v = Coverage::SourceFile.new(path: f, source: ::File.read(f), is_root: first)
+        v = Coverage::SourceFile.new(path: f, source: ::File.read(f))
         output << v.to_covered_source
         output << "\n"
         first = false
       end
 
+      final_output = [
+        Coverage::SourceFile.prelude_operations,
+        output.to_s,
+        Coverage::SourceFile.final_operations,
+      ].join("")
+
       if print_only
-        puts output.to_s
+        puts final_output
       else
-        system("crystal", ["eval", output.to_s])
+        system("crystal", ["eval", final_output])
       end
     end
   end
