@@ -2,6 +2,9 @@ require "compiler/crystal/syntax/*"
 require "digest"
 require "file_utils"
 
+require "./extensions"
+require "./macro_utils"
+
 class Coverage::SourceFile < Crystal::Visitor
   # List of keywords which are trouble with variable
   # name. Some keywoards are not and won't be present in this
@@ -41,6 +44,8 @@ class Coverage::SourceFile < Crystal::Visitor
   getter source : String
   getter! enriched_source : String
   getter required_at : Int32
+
+  include MacroUtils
 
   def self.register_file(f)
     @@already_covered_file_name.add(f.path)
@@ -137,11 +142,14 @@ class Coverage::SourceFile < Crystal::Visitor
     "\n::Coverage.get_results(#{@@outputter}.new)"
   end
 
+  # Inject line tracer for easy debugging.
+  # add `;` after the Coverage instrumentation
+  # to avoid some with macros
   private def inject_line_traces(output)
     output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |str, match|
       [
         "::Coverage[", match[1],
-        ", ", match[2], "] ",
+        ", ", match[2], "]; ",
         match[3],
         inject_location(@path, @lines[match[2].to_i] - 1),
       ].join("")
@@ -167,9 +175,10 @@ class Coverage::SourceFile < Crystal::Visitor
     end
   end
 
-  private def force_inject_cover(node : Crystal::ASTNode)
-    return node if @already_covered_locations.includes?(node.location)
-    already_covered_locations << node.location
+  private def force_inject_cover(node : Crystal::ASTNode, location = nil)
+    location ||= node.location
+    return node if @already_covered_locations.includes?(location)
+    already_covered_locations << location
     return Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
   end
 
@@ -223,7 +232,7 @@ class Coverage::SourceFile < Crystal::Visitor
       list_of_required_file = [] of Coverage::SourceFile
       Coverage::SourceFile.require_expanders << list_of_required_file
 
-      Dir[files_to_load].each do |file|
+      Dir[files_to_load].sort.each do |file|
         next if file !~ /\.cr$/
 
         Coverage::SourceFile.cover_file(file) do
@@ -297,12 +306,22 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def visit(node : Crystal::MacroIf)
+    # Fix the non-location issue on macro.
+    return false if node.location.nil?
+
+    propagate_location_in_macro(node, node.location.not_nil!)
+
     node.then = force_inject_cover(node.then)
     node.else = force_inject_cover(node.else)
-    false
+    true
   end
 
   def visit(node : Crystal::MacroFor)
+    # Fix the non-location issue on macro.
+    return false if node.location.nil?
+
+    propagate_location_in_macro(node, node.location.not_nil!)
+
     node.body = force_inject_cover(node.body)
     false
   end
