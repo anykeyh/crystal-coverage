@@ -109,6 +109,13 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
       cr
     end
 
+    # puts percent covered
+    if sum_lines == 0
+      puts "100% covered"
+    else
+      puts (100.0*(sum_covered / sum_lines.to_f)).round(2).to_s + "% covered"
+    end
+
     # Generate the code
     FileUtils.mkdir_p("coverage")
     generate_index_file(covered_files)
