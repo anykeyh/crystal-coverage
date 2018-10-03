@@ -40,9 +40,9 @@ class Coverage::Outputter::Coveralls < Coverage::Outputter
       end
     end
 
-    ::File.write("coverage/coveralls.json", o)
+    ::File.write("coveralls.json", o)
     headers = HTTP::Headers{"Content-Type" => "multipart/form-data"}
     url = "https://coveralls.io/api/v1/jobs"
-    HTTP::Client.post(url, headers: headers, form: "json_file=#{o}")
+    HTTP::Client.post(url, headers: headers, form: "json_file=@coveralls.json")
   end
 end
