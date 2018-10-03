@@ -38,6 +38,6 @@ class Coverage::Outputter::Coveralls < Coverage::Outputter
       end
     end
 
-    puts o
+    ::File.write("coverage/coveralls.json", o)
   end
 end
