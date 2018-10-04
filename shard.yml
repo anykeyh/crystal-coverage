@@ -14,4 +14,8 @@ targets:
 scripts:
   postinstall: make bin
 
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
+
 license: MIT
