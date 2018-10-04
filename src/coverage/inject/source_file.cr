@@ -232,13 +232,13 @@ class Coverage::SourceFile < Crystal::Visitor
       list_of_required_file = [] of Coverage::SourceFile
       Coverage::SourceFile.require_expanders << list_of_required_file
 
-      Dir[files_to_load].sort.each do |file|
-        next if file !~ /\.cr$/
+      Dir[files_to_load].sort.each do |file_load|
+        next if file_load !~ /\.cr$/
 
-        Coverage::SourceFile.cover_file(file) do
+        Coverage::SourceFile.cover_file(file_load) do
           line_number = node.location.not_nil!.line_number
 
-          required_file = Coverage::SourceFile.new(path: file, source: ::File.read(file),
+          required_file = Coverage::SourceFile.new(path: file_load, source: ::File.read(file_load),
             required_at: line_number)
 
           required_file.process # Process on load, since it can change the requirement order
