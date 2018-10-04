@@ -10,7 +10,7 @@ module Coverage
 
       OptionParser.parse! do |parser|
         parser.banner = "Usage: crystal-cover [options] <filename>"
-        parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport) ") { |f| output_format = f }
+        parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport): HtmlReport, Coveralls ") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |p| print_only = true }
         parser.on("--use-require=REQUIRE", "change the require of cover library in runtime") { |r| Coverage::SourceFile.use_require = r }
         parser.unknown_args do |args|
