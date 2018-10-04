@@ -98,7 +98,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def unfold_required(output)
-    output.gsub(/require[ \t]+\"\$([0-9]+)\"/) do |str, matcher|
+    output.gsub(/require[ \t]+\"\$([0-9]+)\"/) do |_str, matcher|
       expansion_id = matcher[1].to_i
       file_list = @@require_expanders[expansion_id]
 
@@ -146,7 +146,7 @@ class Coverage::SourceFile < Crystal::Visitor
   # add `;` after the Coverage instrumentation
   # to avoid some with macros
   private def inject_line_traces(output)
-    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |str, match|
+    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |_str, match|
       [
         "::Coverage[", match[1],
         ", ", match[2], "]; ",
@@ -232,13 +232,13 @@ class Coverage::SourceFile < Crystal::Visitor
       list_of_required_file = [] of Coverage::SourceFile
       Coverage::SourceFile.require_expanders << list_of_required_file
 
-      Dir[files_to_load].sort.each do |file|
-        next if file !~ /\.cr$/
+      Dir[files_to_load].sort.each do |file_load|
+        next if file_load !~ /\.cr$/
 
-        Coverage::SourceFile.cover_file(file) do
+        Coverage::SourceFile.cover_file(file_load) do
           line_number = node.location.not_nil!.line_number
 
-          required_file = Coverage::SourceFile.new(path: file, source: ::File.read(file),
+          required_file = Coverage::SourceFile.new(path: file_load, source: ::File.read(file_load),
             required_at: line_number)
 
           required_file.process # Process on load, since it can change the requirement order

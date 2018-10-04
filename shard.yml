@@ -7,7 +7,15 @@ authors:
 description: |
   Get coverage rate of your crystal app ! Proof of concept, beware !
 
+targets:
+  crystal-coverage:
+    main: src/coverage/cli.cr
+
 scripts:
-  postinstall: bash ./build/install.sh
+  postinstall: make bin
+
+development_dependencies:
+  ameba:
+    github: veelenga/ameba
 
 license: MIT

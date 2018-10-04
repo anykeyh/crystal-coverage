@@ -1,3 +1,4 @@
 .shards
 /lib/
+/bin/
 /coverage/

@@ -38,6 +38,9 @@ class Coverage::Outputter::Coveralls < Coverage::Outputter
       end
     end
 
-    puts o
+    ::File.write("coveralls.json", o)
+    if ENV["TRAVIS"]?
+      system("curl -X POST https://coveralls.io/api/v1/jobs -H 'content-type: multipart/form-data'  -F json_file=@coveralls.json")
+    end
   end
 end
