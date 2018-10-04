@@ -146,7 +146,7 @@ class Coverage::SourceFile < Crystal::Visitor
   # add `;` after the Coverage instrumentation
   # to avoid some with macros
   private def inject_line_traces(output)
-    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |str, match|
+    output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |_str, match|
       [
         "::Coverage[", match[1],
         ", ", match[2], "]; ",
