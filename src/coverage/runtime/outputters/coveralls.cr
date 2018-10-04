@@ -1,5 +1,3 @@
-
-require "http/client"
 class Coverage::Outputter::Coveralls < Coverage::Outputter
   def initialize
     @service_job_id = (ENV["TRAVIS_JOB_ID"]? || Time.now.epoch.to_s)
@@ -42,10 +40,5 @@ class Coverage::Outputter::Coveralls < Coverage::Outputter
 
     ::File.write("coveralls.json", o)
     system("curl -X POST https://coveralls.io/api/v1/jobs -H 'content-type: multipart/form-data'  -F json_file=@coveralls.json")
-    # headers = HTTP::Headers{"Content-Type" => "multipart/form-data"}
-    # url = "https://coveralls.io/api/v1/jobs"
-    # response = HTTP::Client.post(url, headers: headers, form: "json_file=@coveralls.json")
-    # puts response.status_code
-    # puts response.body.lines.first
   end
 end
