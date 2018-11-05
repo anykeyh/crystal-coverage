@@ -37,7 +37,7 @@ module Coverage
 
   @[AlwaysInline]
   def self.[](file_id, line_id)
-    @@files.unsafe_at(file_id)[line_id]
+    @@files.unsafe_fetch(file_id)[line_id]
   end
 
   # Return results of the coverage in JSON
