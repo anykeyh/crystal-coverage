@@ -1,5 +1,5 @@
 require "option_parser"
-require "tempfile"
+# require "tempfile"
 
 module Coverage
   module CLI
