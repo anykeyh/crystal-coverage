@@ -1,6 +1,6 @@
 class Coverage::Outputter::Coveralls < Coverage::Outputter
   def initialize
-    @service_job_id = (ENV["TRAVIS_JOB_ID"]? || Time.now.epoch.to_s)
+    @service_job_id = (ENV["TRAVIS_JOB_ID"]? || Time.now.to_unix.to_s)
     @service_name = ENV["TRAVIS"]? ? "travis-ci" : "dev"
   end
 
