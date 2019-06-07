@@ -179,7 +179,7 @@ class Coverage::SourceFile < Crystal::Visitor
     location ||= node.location
     return node if @already_covered_locations.includes?(location)
     already_covered_locations << location
-    return Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
+    Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
   end
 
   def inject_cover(node : Crystal::ASTNode)
@@ -201,7 +201,7 @@ class Coverage::SourceFile < Crystal::Visitor
     when Crystal::Break
       force_inject_cover(node)
     else
-      return node
+      node
     end
   end
 
