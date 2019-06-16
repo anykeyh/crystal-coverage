@@ -75,5 +75,4 @@ It then generate a report in the directory `/coverage/` relative to your project
 
 ## Planned features
 
-- Binding with travis + coveralls
-- 
+- Binding with coveralls

@@ -1,0 +1,10 @@
+sudo: required
+
+language: crystal
+
+crystal:
+  - latest
+  
+script:
+  - crystal spec spec/main.cr
+  - ./bin/ameba
