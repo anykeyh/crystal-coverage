@@ -1,10 +1,10 @@
 module MacroUtils
   def propagate_location_in_macro(node : Crystal::ASTNode, location : Nil)
-    return nil
+    nil
   end
 
   def propagate_location_in_macro(node : Crystal::Nop, location : Crystal::Location)
-    return location
+    location
   end
 
   def propagate_location_in_macro(node : Crystal::MacroIf, location : Crystal::Location)
@@ -14,25 +14,20 @@ module MacroUtils
     location = propagate_location_in_macro(node.then, location)
 
     node.else.location = location
-    location = propagate_location_in_macro(node.else, location)
-    return location
+    propagate_location_in_macro(node.else, location)
   end
 
   def propagate_location_in_macro(node : Crystal::MacroFor, location : Crystal::Location)
     location = location.clone
 
     node.body.location = location
-    location = propagate_location_in_macro(node.body, location)
-
-    return location
+    propagate_location_in_macro(node.body, location)
   end
 
   def propagate_location_in_macro(node : Crystal::MacroLiteral, location : Crystal::Location)
     node.location = location
 
-    new_loc = location.clone line_number: location.line_number + node.to_s.count('\n')
-
-    return new_loc
+    location.clone line_number: location.line_number + node.to_s.count('\n')
   end
 
   def propagate_location_in_macro(node : Crystal::Expressions, location)
@@ -43,10 +38,10 @@ module MacroUtils
       new_loc = propagate_location_in_macro(e, new_loc)
     end
 
-    return new_loc
+    new_loc
   end
 
   def propagate_location_in_macro(node : Crystal::ASTNode, location : Crystal::Location)
-    return location
+    location
   end
 end
