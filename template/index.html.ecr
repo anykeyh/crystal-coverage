@@ -9,7 +9,7 @@
       font-family: 'Helvetica Neue', 'Arial', sans-serif;
     }
     iframe {
-      width: calc(100% - 200px);
+      width: calc(100% - 350px);
       height: 100vh;
       margin: 0;
       border: none;
@@ -20,25 +20,44 @@
       box-sizing: border-box;
       float: left;
       height: 100vh;
-      width: 200px;
+      width: 350px;
       display: block;
       overflow: auto;
+      border-right: 1px solid #AAA;
     }
-
     ul {
       margin: 0;
       list-style: none;
       padding: 0;
     }
+    li {
+      padding: 5px;
+      word-break: break-word;
+    }
+    li.odd {
+      background-color: #efefef;
+    }
+    a {
+      font-weight: bold;
+      color: #333;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    h3 {
+      border-bottom: 1px solid #aaa;
+    }
   </style>
 </head>
 <body>
   <nav>
-    <a href="summary.html" target="iframe">Index</a>
+    <a href="summary.html" target="iframe">◄ Back to Index</a>
     <h3>Files</h3>
     <ul>
-      <%- @covered_files.each do |file| -%>
-        <li><a href="<%=file.md5%>.html" target="iframe"><%=file.filename%></li>
+      <%- @covered_files.each_with_index do |file, index| -%>
+        <%- row_color = index.odd? ? "odd" : "even" -%>
+        <li class="<%= row_color %>"><a href="<%=file.md5%>.html" target="iframe"><%=file.filename%></li>
       <%- end -%>
     </ul>
   </nav>
