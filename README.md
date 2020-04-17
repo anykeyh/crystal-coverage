@@ -15,7 +15,7 @@ anyway, if you're bold enough to give a try, read the getting started below !
 
 ## Installation
 
-Just add this line in your `shards.yml` file
+Just add this line in your `shard.yml` file
 
 ```yaml
 development_dependencies:
