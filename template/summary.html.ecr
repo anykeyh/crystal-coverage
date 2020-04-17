@@ -46,6 +46,18 @@
     a:hover {
       text-decoration: underline;
     }
+    .bold {
+      font-weight: bold;
+    }
+    .green {
+      color: #090;
+    }
+    .yellow {
+      color: #ddaa00;
+    }
+    .red {
+      color: #900;
+    }
 
   </style>
 </head>
@@ -66,14 +78,14 @@
         <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
         <td><%=file.relevant_lines%></td>
         <td><%=file.covered_lines%></td>
-        <td><%=file.percent_coverage_str%></td>
+        <td class="<%= percentage_covered_color(cov: file.percent_coverage * 100) %> bold"><%=file.percent_coverage_str%></td>
       </tr>
       <%- end -%>
       <tfoot>
         <th>TOTAL: </th>
         <th><%= total_relevant %></th>
         <th><%= total_covered %></th>
-        <th><%= total_percentage %></th>
+        <th class="<%= percentage_covered_color(cov: total_percentage) %>"><%= total_percentage.to_s %> %</th>
       </tfoot>
     </tbody>
   </table>
