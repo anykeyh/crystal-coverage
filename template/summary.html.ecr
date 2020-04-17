@@ -9,8 +9,18 @@
       font-family: 'Helvetica Neue', 'Arial', sans-serif;
     }
 
+    body {
+      padding: 20px;
+    }
+
     table {
       margin: auto;
+      border: 1px solid #AAA;
+      width: 100%;
+    }
+
+    thead, tfoot {
+      background-color: #ddd;
     }
 
     th {
@@ -18,7 +28,7 @@
     }
 
     th,td {
-      padding: 0.2em, 1em;
+      padding: 5px 20px;
     }
     tr {
       border-bottom: solid 1px black;
@@ -42,8 +52,8 @@
     </thead>
     <tbody>
       <%- @covered_files.each_with_index do |file, index| -%>
-      <%- a = index.odd? ? "odd" : "even" -%>
-      <tr class="<%= a %>">
+      <%- row_color = index.odd? ? "odd" : "even" -%>
+      <tr class="<%= row_color %>">
         <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
         <td><%=file.relevant_lines%></td>
         <td><%=file.covered_lines%></td>
