@@ -24,6 +24,10 @@
       border-bottom: solid 1px black;
     }
 
+    tr.odd {
+      background-color: #efefef;
+    }
+
   </style>
 </head>
 <body>
@@ -37,8 +41,9 @@
       <th>Percentage covered</th>
     </thead>
     <tbody>
-      <%- @covered_files.each do |file| -%>
-      <tr>
+      <%- @covered_files.each_with_index do |file, index| -%>
+      <%- a = index.odd? ? "odd" : "even" -%>
+      <tr class="<%= a %>">
         <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
         <td><%=file.relevant_lines%></td>
         <td><%=file.covered_lines%></td>
