@@ -10,8 +10,8 @@ module Coverage
       print_only = false
 
       OptionParser.parse! do |parser|
-        parser.banner = "Usage: crystal-coverage [options] <filenames>"
-        parser.on("-h", "--help", "show this help") { puts parser }
+        parser.banner = "Usage: crystal-coverage [options] <directories or filenames>"
+        parser.on("-h", "--help", "show this help") { puts parser; exit }
         parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport): HtmlReport, Coveralls ") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |_p| print_only = true }
         parser.on("--use-require=REQUIRE", "change the require of cover library in runtime") { |r| Coverage::SourceFile.use_require = r }
@@ -26,13 +26,13 @@ module Coverage
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
-      first = true
-      output = String::Builder.new(capacity: 2**18)
-
       filenames = targets.map do |target|
         target += "/**/*.cr" if File.directory?(target)
         Dir[target]
       end.flatten.uniq
+
+      first = true
+      output = String::Builder.new(capacity: 2**18)
 
       filenames.each do |f|
         v = Coverage::SourceFile.new(path: f, source: ::File.read(f))
