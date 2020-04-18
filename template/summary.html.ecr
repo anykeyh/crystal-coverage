@@ -73,8 +73,7 @@
     </thead>
     <tbody>
       <%- @covered_files.each_with_index do |file, index| -%>
-      <%- row_color = index.odd? ? "odd" : "even" -%>
-      <tr class="<%= row_color %>">
+      <tr class="<%= index.odd? ? "odd" : "even" %>">
         <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
         <td><%=file.relevant_lines%></td>
         <td><%=file.covered_lines%></td>

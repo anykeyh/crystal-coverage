@@ -56,8 +56,7 @@
     <h3>Files</h3>
     <ul>
       <%- @covered_files.each_with_index do |file, index| -%>
-        <%- row_color = index.odd? ? "odd" : "even" -%>
-        <li class="<%= row_color %>"><a href="<%=file.md5%>.html" target="iframe"><%=file.filename%></li>
+        <li class="<%= index.odd? ? "odd" : "even" %>"><a href="<%=file.md5%>.html" target="iframe"><%=file.filename%></li>
       <%- end -%>
     </ul>
   </nav>
