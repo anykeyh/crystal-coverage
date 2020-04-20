@@ -22,7 +22,7 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
     end
 
     def percent_coverage_str
-      "#{(100*percent_coverage).round(2)}%"
+      "#{(100*percent_coverage).round(2)} %"
     end
   end
 
@@ -42,9 +42,20 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
 
     def total_percentage
       if total_relevant == 0
-        "100%"
+        100.0
       else
-        (100.0*(total_covered / total_relevant.to_f)).round(2).to_s + "%"
+        (100.0*(total_covered / total_relevant.to_f)).round(2)
+      end
+    end
+
+    def percentage_covered_color(cov)
+      case cov
+      when 90.0..100.0
+        "green"
+      when 80.0..89.99
+        "yellow"
+      else
+        "red"
       end
     end
 
