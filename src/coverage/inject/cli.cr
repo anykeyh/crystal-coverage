@@ -1,9 +1,10 @@
 require "option_parser"
-
-# require "tempfile"
+require "log"
 
 module Coverage
   module CLI
+    Log = ::Log.for("cli")
+
     def self.run
       output_format = "HtmlReport"
       targets = [] of String
@@ -22,7 +23,7 @@ module Coverage
         end
       end
 
-      raise "You must choose at least one file to compile" unless targets.any?
+      Log.error { "You must choose at least one file to compile" } unless targets.any?
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
