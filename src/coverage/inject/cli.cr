@@ -30,7 +30,7 @@ module Coverage
       filenames = targets.map do |target|
         target += "/**/*.cr" if File.directory?(target)
         Dir[target]
-      end.flatten.uniq
+      end.flatten.uniq!
 
       first = true
       output = String::Builder.new(capacity: 2**18)
