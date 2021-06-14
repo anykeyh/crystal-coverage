@@ -1,4 +1,5 @@
 require "option_parser"
+
 # require "tempfile"
 
 module Coverage
@@ -8,7 +9,7 @@ module Coverage
       filenames = [] of String
       print_only = false
 
-      OptionParser.parse! do |parser|
+      OptionParser.parse do |parser|
         parser.banner = "Usage: crystal-cover [options] <filename>"
         parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport): HtmlReport, Coveralls ") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |_p| print_only = true }

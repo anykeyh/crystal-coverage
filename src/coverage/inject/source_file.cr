@@ -66,7 +66,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def initialize(@path, @source, @required_at = 0)
-    @path = Coverage::SourceFile.relative_path_to_project(File.expand_path(@path, "."))
+    @path = Coverage::SourceFile.relative_path_to_project(::File.expand_path(@path, "."))
     @md5_signature = Digest::MD5.hexdigest(@source)
     @id = Coverage::SourceFile.register_file(self)
   end
@@ -103,7 +103,8 @@ class Coverage::SourceFile < Crystal::Visitor
       file_list = @@require_expanders[expansion_id]
 
       if file_list.any?
-        io = String::Builder.new(capacity: (2 ** 20))
+        # io = String::Builder.new(capacity: (2 ** 20))
+        io = String::Builder.new(2 ** 20)
         file_list.each do |file|
           io << "#" << "require of `" << file.path
           io << "` from `" << self.path << ":#{file.required_at}" << "`" << "\n"
@@ -127,8 +128,10 @@ class Coverage::SourceFile < Crystal::Visitor
     file_maps = @@file_list.map do |f|
       if f.lines.any?
         "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
+        # "::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[#{f.lines.join(", ")}])"
       else
         "::Coverage::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[] of Int32)"
+        # "::File.new(\"#{f.path}\", \"#{f.md5_signature}\",[] of Int32)"
       end
     end.join("\n")
 
@@ -213,9 +216,9 @@ class Coverage::SourceFile < Crystal::Visitor
     file = node.string
     # we cover only files which are relative to current file
     if file[0] == '.'
-      current_directory = Coverage::SourceFile.relative_path_to_project(File.dirname(@path))
+      current_directory = Coverage::SourceFile.relative_path_to_project(::File.dirname(@path))
 
-      files_to_load = File.expand_path(file, current_directory)
+      files_to_load = ::File.expand_path(file, current_directory)
 
       if files_to_load =~ /\*$/
         # Case when we want to require a directory and subdirectories
