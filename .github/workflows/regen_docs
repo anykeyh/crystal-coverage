@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+rm -R ./docs || true
+crystal docs --project-name $(basename $(pwd)) --project-version $(shards version)

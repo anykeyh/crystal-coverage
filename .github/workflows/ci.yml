@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'  # Every monday 6 AM
+
+jobs:
+  build:
+    # TODO: Get the Windows builds working...
+    # continue-on-error: ${{ matrix.os.windows-latest }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # os: [ubuntu-latest, macos-latest]
+        crystal: [null]
+        include:
+          - os: ubuntu-latest
+            crystal: nightly
+    runs-on: ${{matrix.os}}
+
+    steps:
+      - name: Configure Git
+        run: |
+          git config --global user.email "drhuffman12@gmail.com"
+          git config --global user.name "Daniel Huffman"
+          git config --global column.ui always
+          git config --global core.autocrlf false
+      - name: Install Crystal
+        uses: oprypin/install-crystal@v1
+        with:
+          crystal: ${{matrix.crystal}}
+
+      - name: Download source
+        uses: actions/checkout@v2
+
+      - name: Build
+        # run: shards install --ignore-crystal-version --skip-postinstall
+        run: shards install --ignore-crystal-version --without-development
+
+      - name: Test
+        run: crystal spec
+
+      - name: Check formatting
+        run: crystal tool format --check src spec
+
+      # - name: Check style/etc
+      #   run: crystal bin/ameba.cr
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Crystal
+        uses: oprypin/install-crystal@v1
+        with:
+          crystal: ${{matrix.crystal}}
+
+      - name: Download source
+        uses: actions/checkout@v2
+
+      - name: Build
+        # run: shards install --ignore-crystal-version --skip-postinstall
+        run: shards install --ignore-crystal-version --without-development
+
+      - name: Docs
+        run: .github/workflows/regen_docs
+
+  # docs:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Download source
+  #       uses: actions/checkout@v2
+  #     - name: Build docs
+  #       run: crystal docs
