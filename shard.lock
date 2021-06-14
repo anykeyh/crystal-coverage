@@ -1,6 +1,6 @@
-version: 1.0
+version: 2.0
 shards:
   ameba:
-    github: veelenga/ameba
-    version: 0.10.0
+    git: https://github.com/crystal-ameba/ameba.git
+    version: 0.14.3
 
