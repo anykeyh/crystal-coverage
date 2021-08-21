@@ -25,12 +25,12 @@ module Coverage
         end
       end
 
-      raise "You must choose a file to compile" unless filenames.any?
+      filenames = Dir["spec/**/*_spec.cr"] unless filenames.any?
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
       first = true
-      output = String::Builder.new(capacity: 2**18)
+      output = String::Builder.new
       filenames.each do |f|
         v = Coverage::SourceFile.new(path: f, source: ::File.read(f))
         output << v.to_covered_source

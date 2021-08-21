@@ -81,7 +81,7 @@ class Coverage::SourceFile < Crystal::Visitor
 
   def to_covered_source
     if @enriched_source.nil?
-      io = String::Builder.new(capacity: 32_768)
+      io = String::Builder.new
 
       # call process to enrich AST before
       # injection of cover head dependencies
@@ -103,7 +103,7 @@ class Coverage::SourceFile < Crystal::Visitor
       file_list = @@require_expanders[expansion_id]
 
       if file_list.any?
-        io = String::Builder.new(capacity: (2 ** 20))
+        io = String::Builder.new
         file_list.each do |file|
           io << "#" << "require of `" << file.path
           io << "` from `" << self.path << ":#{file.required_at}" << "`" << "\n"
@@ -177,7 +177,7 @@ class Coverage::SourceFile < Crystal::Visitor
 
   private def force_inject_cover(node : Crystal::ASTNode, location = nil)
     location ||= node.location
-    return node if @already_covered_locations.includes?(location)
+    return node if @already_covered_locations.includes?(location) || @path.starts_with? "spec/"
     already_covered_locations << location
     Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
   end
