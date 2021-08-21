@@ -28,7 +28,7 @@ Wait for the binary to compile. The binary will be build in `bin/crystal-coverag
 ## Usage
 
 ```
-crystal-coverage spec/myfile_spec1.cr spec/myfile_spec2.cr
+bin/crystal-coverage
 ```
 
 Coverage file will be recreated after your software run on `coverage/` folder.
@@ -60,7 +60,7 @@ software is executed without release flag.
 To test in `--release` mode, you can do:
 
 ```
-crystal-coverage src/main.cr -p | crystal eval --release
+bin/crystal-coverage -p | crystal eval --release
 ```
 
 ## How does it works?
