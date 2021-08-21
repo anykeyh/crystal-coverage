@@ -139,7 +139,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def self.final_operations
-    "\n::Coverage.get_results(#{@@outputter}.new)"
+    "\n Spec.after_suite { ::Coverage.get_results(#{@@outputter}.new) }"
   end
 
   # Inject line tracer for easy debugging.
