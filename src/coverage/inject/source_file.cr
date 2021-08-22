@@ -144,12 +144,15 @@ class Coverage::SourceFile < Crystal::Visitor
 
   # Inject line tracer for easy debugging.
   # add `;` after the Coverage instrumentation
-  # to avoid some with macros
+  # to avoid some with macros. Be careful to only insert
+  # `;` if there is something else on the same line, or else
+  # it breaks parsing with expressions inside expressions.
   private def inject_line_traces(output)
     output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |_str, match|
       [
         "::Coverage[", match[1],
-        ", ", match[2], "]; ",
+        ", ", match[2], "]",
+        match[3].empty? ? " " : "; ",
         match[3],
         inject_location(@path, @lines[match[2].to_i] - 1),
       ].join("")
