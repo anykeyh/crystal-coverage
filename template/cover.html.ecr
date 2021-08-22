@@ -94,15 +94,11 @@
     <hr>
     <table class="cover-table">
       <thead>
-        <th>Hitted lines</th>
-        <th>Relevant lines</th>
-        <th>Percentage</th>
+        <th>Lines</th>
       </thead>
       <tbody>
         <tr>
-          <td><%=@file.relevant_lines%></td>
-          <td><%=@file.covered_lines%></td>
-          <td class="low"><%=@file.percent_coverage_str%></td>
+          <td><%=@file.covered_lines%> / <%=@file.relevant_lines%> (<%=@file.percent_coverage_str%>)</td>
         </tr>
       </tbody>
     </table>
