@@ -5,7 +5,7 @@ SHARD_BIN ?= ../../bin
 
 build: bin/crystal-coverage
 bin/crystal-coverage: $(shell find src -type f -name '*.cr')
-	$(SHARDS_BIN) build $(CRFLAGS)
+	$(SHARDS_BIN) --without-development build $(CRFLAGS)
 clean:
 	rm -f .bin/crystal-coverage .bin/crystal-coverage.dwarf
 install: build
