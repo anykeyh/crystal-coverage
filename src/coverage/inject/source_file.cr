@@ -168,7 +168,7 @@ class Coverage::SourceFile < Crystal::Visitor
 
       n = Crystal::Call.new(Crystal::Global.new("::Coverage"), "[]",
         [Crystal::NumberLiteral.new(@id),
-         Crystal::NumberLiteral.new(lidx)].unsafe_as(Array(Crystal::ASTNode)))
+         Crystal::NumberLiteral.new(lidx)] of Crystal::ASTNode)
       n
     else
       node
@@ -179,7 +179,7 @@ class Coverage::SourceFile < Crystal::Visitor
     location ||= node.location
     return node if @already_covered_locations.includes?(location) || @path.starts_with? "spec/"
     already_covered_locations << location
-    Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
+    Crystal::Expressions.from([inject_coverage_tracker(node), node] of Crystal::ASTNode)
   end
 
   def inject_cover(node : Crystal::ASTNode)
