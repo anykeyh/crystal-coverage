@@ -11,11 +11,13 @@ targets:
   crystal-coverage:
     main: src/coverage/cli.cr
 
+crystal: ">= 1.0.0, < 2.0.0"
+
 scripts:
   postinstall: make bin
 
 development_dependencies:
   ameba:
-    github: veelenga/ameba
+    github: crystal-ameba/ameba
 
 license: MIT
