@@ -315,7 +315,7 @@ class Coverage::SourceFile < Crystal::Visitor
     propagate_location_in_macro(node, node.location.not_nil!)
 
     node.then = force_inject_cover(node.then)
-    node.else = force_inject_cover(node.else)
+    node.else = force_inject_cover(node.else) unless node.cond == BoolLiteral.new(true)
     true
   end
 
