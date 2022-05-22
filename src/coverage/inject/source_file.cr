@@ -120,7 +120,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_location(file = @path, line = 0, column = 0)
-    %(#<loc:"#{file}",#{[line, 0].max},#{[column, 0].max}>)
+    %(#<loc:"#{File.expand_path(file, ".")}",#{[line, 0].max},#{[column, 0].max}>)
   end
 
   def self.prelude_operations
