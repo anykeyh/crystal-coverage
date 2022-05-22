@@ -72,7 +72,7 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
   end
 
   def output(files : Array(Coverage::File))
-    system("rm -r coverage/")
+    system("rm -rf coverage/")
 
     sum_lines = 0
     sum_covered = 0
