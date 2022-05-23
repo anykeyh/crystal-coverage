@@ -6,25 +6,6 @@ require "./extensions"
 require "./macro_utils"
 
 class Coverage::SourceFile < Crystal::Visitor
-  # List of keywords which are trouble with variable
-  # name. Some keywoards are not and won't be present in this
-  # list.
-  # Since this can break the code replacing the variable by a underscored
-  # version of it, and I'm not sure about this list, we will need to add/remove
-  # stuff to not break the code.
-  CRYSTAL_KEYWORDS = %w(
-    abstract do if nil? self unless
-    alias else of sizeof until
-    as elsif include struct when
-    as? end instance_sizeof pointerof super while
-    asm ensure is_a? private then with
-    begin enum lib protected true yield
-    break extend macro require
-    case false module rescue typeof
-    class for next return uninitialized
-    def fun nil select union
-  )
-
   class_getter file_list = [] of Coverage::SourceFile
   class_getter already_covered_file_name = Set(String).new
   class_getter! project_path : String
@@ -264,26 +245,11 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def visit(node : Crystal::Arg)
-    name = node.name
-    if CRYSTAL_KEYWORDS.includes?(name)
-      node.external_name = node.name = "_#{name}"
-    end
-
     true
   end
 
   # Placeholder for bug #XXX
   def visit(node : Crystal::Assign)
-    target = node.target
-    value = node.value
-
-    if target.is_a?(Crystal::InstanceVar) &&
-       value.is_a?(Crystal::Var)
-      if CRYSTAL_KEYWORDS.includes?(value.name)
-        value.name = "_#{value.name}"
-      end
-    end
-
     true
   end
 
