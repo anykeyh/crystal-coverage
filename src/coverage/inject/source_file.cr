@@ -74,7 +74,9 @@ class Coverage::SourceFile < Crystal::Visitor
   # Inject in AST tree if required.
   def process
     unless @astree
-      @astree = Crystal::Parser.parse(self.source)
+      parser = Crystal::Parser.new(self.source)
+      parser.filename = File.expand_path(path, ".")
+      @astree = parser.parse
       astree.accept(self)
     end
   end
