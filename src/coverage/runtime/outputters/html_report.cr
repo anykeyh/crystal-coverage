@@ -1,6 +1,7 @@
 require "ecr"
 require "file_utils"
 require "html"
+require "../coverage"
 
 class Coverage::Outputter::HtmlReport < Coverage::Outputter
   struct CoverageReport
@@ -22,7 +23,7 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
     end
 
     def percent_coverage_str
-      "#{(100*percent_coverage).round(2)}%"
+      "#{"%.2f" % (100*percent_coverage)}%"
     end
   end
 
@@ -71,9 +72,7 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
   end
 
   def output(files : Array(Coverage::File))
-    puts "Generating coverage report, please wait..."
-
-    system("rm -r coverage/")
+    system("rm -rf coverage/")
 
     sum_lines = 0
     sum_covered = 0
@@ -107,14 +106,12 @@ class Coverage::Outputter::HtmlReport < Coverage::Outputter
       sum_covered += cr.covered_lines
 
       cr
+    end.select do |cr|
+      cr.relevant_lines > 0
     end
 
     # puts percent covered
-    if sum_lines == 0
-      puts "100% covered"
-    else
-      puts (100.0*(sum_covered / sum_lines.to_f)).round(2).to_s + "% covered"
-    end
+    print "\nLines #{sum_lines == 0 ? 100 : "%.2f" % (100 * sum_covered / sum_lines)}% covered"
 
     # Generate the code
     FileUtils.mkdir_p("coverage")

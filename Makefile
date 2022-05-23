@@ -4,8 +4,8 @@ PREFIX ?= /usr/local
 SHARD_BIN ?= ../../bin
 
 build: bin/crystal-coverage
-bin/crystal-coverage:
-	$(SHARDS_BIN) build $(CRFLAGS)
+bin/crystal-coverage: $(shell find src -type f -name '*.cr')
+	$(SHARDS_BIN) --without-development build $(CRFLAGS)
 clean:
 	rm -f .bin/crystal-coverage .bin/crystal-coverage.dwarf
 install: build
@@ -16,4 +16,4 @@ bin: build
 	cp ./bin/crystal-coverage $(SHARD_BIN)
 # test: build
 # 	$(CRYSTAL_BIN) spec
-# 	./bin/crystal-coverage 
+# 	./bin/crystal-coverage

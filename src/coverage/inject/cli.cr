@@ -1,4 +1,5 @@
 require "option_parser"
+
 # require "tempfile"
 
 module Coverage
@@ -8,11 +9,15 @@ module Coverage
       filenames = [] of String
       print_only = false
 
-      OptionParser.parse! do |parser|
-        parser.banner = "Usage: crystal-cover [options] <filename>"
+      OptionParser.parse do |parser|
+        parser.banner = "Usage: crystal-coverage [options] <filename>"
         parser.on("-o FORMAT", "--output-format=FORMAT", "The output format used (default: HtmlReport): HtmlReport, Coveralls ") { |f| output_format = f }
         parser.on("-p", "--print-only", "output the generated source code") { |_p| print_only = true }
         parser.on("--use-require=REQUIRE", "change the require of cover library in runtime") { |r| Coverage::SourceFile.use_require = r }
+        parser.on("-h", "--help", "Show this help") do
+          puts parser
+          exit
+        end
         parser.unknown_args do |args|
           args.each do
             filenames << ARGV.shift
@@ -20,12 +25,12 @@ module Coverage
         end
       end
 
-      raise "You must choose a file to compile" unless filenames.any?
+      filenames = Dir["spec/**/*_spec.cr"] unless filenames.any?
 
       Coverage::SourceFile.outputter = "Coverage::Outputter::#{output_format.camelcase}"
 
       first = true
-      output = String::Builder.new(capacity: 2**18)
+      output = String::Builder.new
       filenames.each do |f|
         v = Coverage::SourceFile.new(path: f, source: ::File.read(f))
         output << v.to_covered_source

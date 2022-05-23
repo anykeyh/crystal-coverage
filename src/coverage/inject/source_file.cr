@@ -6,25 +6,6 @@ require "./extensions"
 require "./macro_utils"
 
 class Coverage::SourceFile < Crystal::Visitor
-  # List of keywords which are trouble with variable
-  # name. Some keywoards are not and won't be present in this
-  # list.
-  # Since this can break the code replacing the variable by a underscored
-  # version of it, and I'm not sure about this list, we will need to add/remove
-  # stuff to not break the code.
-  CRYSTAL_KEYWORDS = %w(
-    abstract do if nil? self unless
-    alias else of sizeof until
-    as elsif include struct when
-    as? end instance_sizeof pointerof super while
-    asm ensure is_a? private then with
-    begin enum lib protected true yield
-    break extend macro require
-    case false module rescue typeof
-    class for next return uninitialized
-    def fun nil select union
-  )
-
   class_getter file_list = [] of Coverage::SourceFile
   class_getter already_covered_file_name = Set(String).new
   class_getter! project_path : String
@@ -74,14 +55,16 @@ class Coverage::SourceFile < Crystal::Visitor
   # Inject in AST tree if required.
   def process
     unless @astree
-      @astree = Crystal::Parser.parse(self.source)
+      parser = Crystal::Parser.new(self.source)
+      parser.filename = File.expand_path(path, ".")
+      @astree = parser.parse
       astree.accept(self)
     end
   end
 
   def to_covered_source
     if @enriched_source.nil?
-      io = String::Builder.new(capacity: 32_768)
+      io = String::Builder.new
 
       # call process to enrich AST before
       # injection of cover head dependencies
@@ -103,7 +86,7 @@ class Coverage::SourceFile < Crystal::Visitor
       file_list = @@require_expanders[expansion_id]
 
       if file_list.any?
-        io = String::Builder.new(capacity: (2 ** 20))
+        io = String::Builder.new
         file_list.each do |file|
           io << "#" << "require of `" << file.path
           io << "` from `" << self.path << ":#{file.required_at}" << "`" << "\n"
@@ -120,7 +103,7 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   private def inject_location(file = @path, line = 0, column = 0)
-    %(#<loc:"#{file}",#{[line, 0].max},#{[column, 0].max}>)
+    %(#<loc:"#{File.expand_path(file, ".")}",#{[line, 0].max},#{[column, 0].max}>)
   end
 
   def self.prelude_operations
@@ -139,17 +122,20 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def self.final_operations
-    "\n::Coverage.get_results(#{@@outputter}.new)"
+    "\n Spec.after_suite { ::Coverage.get_results(#{@@outputter}.new) }"
   end
 
   # Inject line tracer for easy debugging.
   # add `;` after the Coverage instrumentation
-  # to avoid some with macros
+  # to avoid some with macros. Be careful to only insert
+  # `;` if there is something else on the same line, or else
+  # it breaks parsing with expressions inside expressions.
   private def inject_line_traces(output)
     output.gsub(/\:\:Coverage\[([0-9]+),[ ]*([0-9]+)\](.*)/) do |_str, match|
       [
         "::Coverage[", match[1],
-        ", ", match[2], "]; ",
+        ", ", match[2], "]",
+        match[3].empty? ? " " : "; ",
         match[3],
         inject_location(@path, @lines[match[2].to_i] - 1),
       ].join("")
@@ -168,7 +154,7 @@ class Coverage::SourceFile < Crystal::Visitor
 
       n = Crystal::Call.new(Crystal::Global.new("::Coverage"), "[]",
         [Crystal::NumberLiteral.new(@id),
-         Crystal::NumberLiteral.new(lidx)].unsafe_as(Array(Crystal::ASTNode)))
+         Crystal::NumberLiteral.new(lidx)] of Crystal::ASTNode)
       n
     else
       node
@@ -177,9 +163,9 @@ class Coverage::SourceFile < Crystal::Visitor
 
   private def force_inject_cover(node : Crystal::ASTNode, location = nil)
     location ||= node.location
-    return node if @already_covered_locations.includes?(location)
+    return node if @already_covered_locations.includes?(location) || @path.starts_with? "spec/"
     already_covered_locations << location
-    Crystal::Expressions.from([inject_coverage_tracker(node), node].unsafe_as(Array(Crystal::ASTNode)))
+    Crystal::Expressions.from([inject_coverage_tracker(node), node] of Crystal::ASTNode)
   end
 
   def inject_cover(node : Crystal::ASTNode)
@@ -259,26 +245,11 @@ class Coverage::SourceFile < Crystal::Visitor
   end
 
   def visit(node : Crystal::Arg)
-    name = node.name
-    if CRYSTAL_KEYWORDS.includes?(name)
-      node.external_name = node.name = "_#{name}"
-    end
-
     true
   end
 
   # Placeholder for bug #XXX
   def visit(node : Crystal::Assign)
-    target = node.target
-    value = node.value
-
-    if target.is_a?(Crystal::InstanceVar) &&
-       value.is_a?(Crystal::Var)
-      if CRYSTAL_KEYWORDS.includes?(value.name)
-        value.name = "_#{value.name}"
-      end
-    end
-
     true
   end
 
@@ -312,7 +283,7 @@ class Coverage::SourceFile < Crystal::Visitor
     propagate_location_in_macro(node, node.location.not_nil!)
 
     node.then = force_inject_cover(node.then)
-    node.else = force_inject_cover(node.else)
+    node.else = force_inject_cover(node.else) unless node.cond == Crystal::BoolLiteral.new(true)
     true
   end
 

@@ -32,24 +32,20 @@
   <table>
     <thead>
       <th>File</th>
-      <th>Relevant lines</th>
-      <th>Covered lines</th>
-      <th>Percentage covered</th>
+      <th>Lines</th>
     </thead>
     <tbody>
       <%- @covered_files.each do |file| -%>
       <tr>
         <td><a href="<%=file.md5%>.html"><%=file.filename%></a></td>
-        <td><%=file.relevant_lines%></td>
-        <td><%=file.covered_lines%></td>
-        <td><%=file.percent_coverage_str%></td>
+        <td><%=file.covered_lines%> / <%=file.relevant_lines%> (<%=file.percent_coverage_str%>)</td>
+        <td></td>
+        <td></td>
       </tr>
       <%- end -%>
       <tfoot>
         <th>TOTAL: </th>
-        <th><%= total_relevant %></th>
-        <th><%= total_covered %></th>
-        <th><%= total_percentage %></th>
+        <th><%= total_covered %> / <%= total_relevant %> (<%= total_percentage %>)</th>
       </tfoot>
     </tbody>
   </table>
